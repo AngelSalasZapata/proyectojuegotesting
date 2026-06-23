@@ -1,4 +1,7 @@
+import os
 import pygame
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SCREEN_WIDTH = 1280
 SCREEN_HEIGHT = 720
@@ -24,6 +27,28 @@ TRACK_BORDER = (120, 120, 120)
 TRACK_WIDTH = 200
 TRACK_CURB = (200, 200, 200)
 
+# --- Pista basada en imagen + mascara de colisiones -------------------------
+
+TRACK_NAME = "track1"
+TRACK_DATA_PATH = os.path.join(BASE_DIR, "tracks", f"{TRACK_NAME}.json")
+
+# Color que la mascara usa para representar la superficie de pista transitable
+# Cualquier pixel que no se parezca a este color se considera pared/cesped y bloquea al auto. 
+TRACK_MASK_DRIVABLE_COLOR = (255, 255, 255)
+TRACK_MASK_COLOR_TOLERANCE = 30
+
+# Waypoints de referencia, solo se usan si no existe tracks/track1.json 
+TRACK_WAYPOINTS = [
+    (500, 143),
+    (700, 203),
+    (830, 400),
+    (700, 596),
+    (500, 656),
+    (300, 596),
+    (169, 400),
+    (300, 203),
+]
+
 CAR_WIDTH = 40
 CAR_HEIGHT = 20
 CAR_COLOR = RED
@@ -41,18 +66,12 @@ AI_TURN_SPEED = 3.2
 AI_TARGET_DISTANCE = 200
 AI_SLOW_DOWN_ANGLE = 30
 
-LAP_COUNT = 6
+# Sensores de pared para que la IA "vea" obstaculos 
+AI_SENSOR_LENGTH = 70
+AI_SENSOR_ANGLES = (-35, 0, 35)
+AI_STEER_SMOOTHING = 0.25
 
-TRACK_WAYPOINTS = [
-    (400, 150),
-    (700, 200),
-    (850, 400),
-    (800, 600),
-    (500, 700),
-    (200, 650),
-    (100, 450),
-    (200, 250),
-]
+LAP_COUNT = 6
 
 FONT_NAME = None
 FONT_SIZE_SMALL = 24

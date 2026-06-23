@@ -7,6 +7,8 @@ class Car:
     def __init__(self, x, y, color=CAR_COLOR):
         self.x = x
         self.y = y
+        self.prev_x = x
+        self.prev_y = y
         self.angle = -90
         self.speed = 0
         self.width = CAR_WIDTH
@@ -19,6 +21,7 @@ class Car:
         self.turn_speed = CAR_TURN_SPEED
         self.lap = 0
         self.last_progress = 0
+        self.segments_visited = set()
         self.finished = False
 
     def get_center(self):
@@ -54,6 +57,8 @@ class Car:
             self.angle += self.turn_speed * (1 if self.speed > 0 else -1)
 
     def update(self):
+        self.prev_x = self.x
+        self.prev_y = self.y
         self.speed *= self.friction
         if abs(self.speed) < 0.01:
             self.speed = 0

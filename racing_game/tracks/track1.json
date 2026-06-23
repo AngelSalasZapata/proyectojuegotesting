@@ -1,0 +1,16 @@
+{
+  "_nota": "Ajusta 'waypoints' para que sigan la linea central real de track1.png/track1_mask.png. Las coordenadas son pixeles de esa imagen (0,0 = esquina superior izquierda).",
+  "image": "assets/images/tracks/track1.png",
+  "mask": "assets/images/tracks/track1_mask.png",
+  "road_width": 200,
+  "waypoints": [
+    [500, 143],
+    [700, 203],
+    [830, 400],
+    [700, 596],
+    [500, 656],
+    [300, 596],
+    [169, 400],
+    [300, 203]
+  ]
+}

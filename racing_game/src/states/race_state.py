@@ -1,15 +1,11 @@
-import math
 import pygame
-from settings import (
-    SCREEN_WIDTH, SCREEN_HEIGHT, TRACK_WAYPOINTS, TRACK_WIDTH,
-    LAP_COUNT, AI_CAR_COUNT, AI_CAR_COLORS
-)
+from settings import LAP_COUNT, AI_CAR_COUNT, AI_CAR_COLORS, TRACK_DATA_PATH
 from src.core.camera import Camera
-from src.core.track import Track
+from track import Track
+from track_loader import load_track_config
 from src.entities.car import Car
 from src.entities.ai_car import AICar
 from src.ui.hud import HUD
-from src.utils.helpers import distance
 from src.utils.collisions import car_collision_mtv
 
 
@@ -31,25 +27,33 @@ class RaceState:
         self.race_finished = False
         self.finish_order = []
         self.race_time = 0
-        self.track = Track(TRACK_WAYPOINTS, TRACK_WIDTH)
+        config = load_track_config(TRACK_DATA_PATH)
+        self.track = Track.from_config(config)
         self._create_player()
         self._create_ai_cars()
 
     def _create_player(self):
-        sp = TRACK_WAYPOINTS[0]
+        sp = self.track.waypoints[0]
         self.player = Car(sp[0], sp[1], (255, 50, 50))
         self.player.last_progress = self.track.get_progress(self.player.x, self.player.y)
 
     def _create_ai_cars(self):
         self.ai_cars = []
-        pts = TRACK_WAYPOINTS
+        pts = self.track.waypoints
         n = len(pts)
         for i in range(AI_CAR_COUNT):
             color = AI_CAR_COLORS[i % len(AI_CAR_COLORS)]
             wp_idx = (i + 1) * n // (AI_CAR_COUNT + 1) % n
             wp = pts[wp_idx]
-            speed_mult = 0.55 + (i / max(AI_CAR_COUNT - 1, 1)) * 0.40
-            ai = AICar(wp[0] + 15, wp[1] + 15, color, self.track, speed_mult, wp_idx)
+            speed_mult = 1.0
+            sx, sy = wp
+            for ox, oy in [(0, 0), (15, 15), (-15, -15), (15, -15), (-15, 15),
+                           (30, 0), (-30, 0), (0, 30), (0, -30)]:
+                tx, ty = wp[0] + ox, wp[1] + oy
+                if self.track.is_on_track(tx, ty):
+                    sx, sy = tx, ty
+                    break
+            ai = AICar(sx, sy, color, self.track, speed_mult, wp_idx)
             ai_progress = self.track.get_progress(ai.x, ai.y)
             ai.last_progress = ai_progress
             _, _, track_dir = self.track.get_lookahead_point(ai_progress, 0.1)
@@ -71,12 +75,16 @@ class RaceState:
         if car.finished:
             return
         progress = self.track.get_progress(car.x, car.y)
+        seg_idx = int(progress) % self.track.n
+        car.segments_visited.add(seg_idx)
         if self.track.check_lap(progress, car.last_progress):
-            car.lap += 1
-            if car.lap >= LAP_COUNT:
-                car.finished = True
-                label = "Jugador" if car is self.player else f"IA {self.ai_cars.index(car) + 1}"
-                self.finish_order.append((label, car.lap, True))
+            if len(car.segments_visited) >= self.track.n * 0.75:
+                car.lap += 1
+                car.segments_visited.clear()
+                if car.lap >= LAP_COUNT:
+                    car.finished = True
+                    label = "Jugador" if car is self.player else f"IA {self.ai_cars.index(car) + 1}"
+                    self.finish_order.append((label, car.lap, True))
         car.last_progress = progress
 
     def update(self, dt):
@@ -143,10 +151,7 @@ class RaceState:
             self.state_manager.change_state("gameover")
 
     def render(self, screen):
-        self.track.render_grass(screen, self.camera)
-        self.track.render_road(screen, self.camera)
-        self.track.render_edges(screen, self.camera)
-        self.track.render_center_dashes(screen, self.camera)
+        self.track.render(screen, self.camera)
         self.track.render_start_finish(screen, self.camera)
         self.track.draw_checkpoints(screen, self.camera)
 
