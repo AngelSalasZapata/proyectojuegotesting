@@ -154,7 +154,7 @@ class RaceState:
         progress = self.track.get_progress(car.x, car.y)
         seg_idx = int(progress) % self.track.n
         car.segments_visited.add(seg_idx)
-        if self.track.check_lap(progress, car.last_progress):
+        if self.track.check_lap(progress, car.last_progress) and progress < 1.0:
             if len(car.segments_visited) >= self.track.n * 0.75:
                 car.lap += 1
                 car.segments_visited.clear()
@@ -184,8 +184,8 @@ class RaceState:
         self._update_race_progress(self.player)
 
         for ai in self.ai_cars:
+            ai.update()
             if not ai.finished:
-                ai.update()
                 self.track.constrain_car(ai)
                 self._update_race_progress(ai)
 

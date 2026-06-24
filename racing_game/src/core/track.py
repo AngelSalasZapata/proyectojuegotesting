@@ -3,7 +3,7 @@ import os
 
 import pygame
 
-from settings import WHITE, BLACK, TRACK_MASK_DRIVABLE_COLOR, TRACK_MASK_COLOR_TOLERANCE
+from settings import WHITE, BLACK, DARK_GREEN, TRACK_MASK_DRIVABLE_COLOR, TRACK_MASK_COLOR_TOLERANCE
 from src.entities.checkpoint import Checkpoint
 
 
@@ -168,9 +168,16 @@ class Track:
     # --- render ------------------------------------------------------------
 
     def render(self, screen, camera):
-        screen.fill(BLACK)
+        screen.fill(DARK_GREEN)
         pos = camera.apply((0, 0))
-        screen.blit(self.image, pos)
+        if not hasattr(self, '_scaled') or self._last_zoom != camera.zoom:
+            self._scaled = pygame.transform.scale(
+                self.image,
+                (int(self.image.get_width() * camera.zoom),
+                 int(self.image.get_height() * camera.zoom))
+            )
+            self._last_zoom = camera.zoom
+        screen.blit(self._scaled, pos)
 
     def render_start_finish(self, screen, camera):
         if not self.checkpoints:

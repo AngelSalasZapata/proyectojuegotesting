@@ -10,7 +10,7 @@ from src.states.gameover_state import GameOverState
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE | pygame.SCALED)
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
         self.running = True

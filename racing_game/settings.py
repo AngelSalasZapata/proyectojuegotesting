@@ -4,7 +4,7 @@ import pygame
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 SCREEN_WIDTH = 1280
-SCREEN_HEIGHT = 720
+SCREEN_HEIGHT = 820
 FPS = 60
 TITLE = "Carreras"
 
