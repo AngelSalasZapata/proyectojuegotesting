@@ -1,5 +1,5 @@
 import pygame
-from settings import SCREEN_WIDTH, FONT_NAME, FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, WHITE, BLACK, GREEN, RED
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FONT_NAME, FONT_SIZE_SMALL, FONT_SIZE_MEDIUM, WHITE, RED, GREEN
 
 
 class HUD:
@@ -32,13 +32,15 @@ class HUD:
             finish_rect = finish_text.get_rect(center=(SCREEN_WIDTH // 2, 30))
             screen.blit(finish_text, finish_rect)
 
+        total_bars = len(sorted_cars)
+        bar_start_y = (SCREEN_HEIGHT - total_bars * 25) // 2
         for i, (car, name) in enumerate(sorted_cars):
-            if car is not player_car:
-                bar_color = car.color
-                progress = min((car.lap + car.last_progress / 8) / total_laps, 1.0)
-                bar_x = SCREEN_WIDTH - 160
-                bar_y = 10 + i * 25
-                pygame.draw.rect(screen, (50, 50, 50), (bar_x, bar_y, 150, 20))
-                pygame.draw.rect(screen, bar_color, (bar_x, bar_y, int(150 * progress), 20))
-                name_text = self.font_small.render(name, True, WHITE)
-                screen.blit(name_text, (bar_x, bar_y - 16))
+            bar_color = RED if car is player_car else car.color
+            progress = min((car.lap + car.last_progress / 8) / total_laps, 1.0)
+            bar_x = SCREEN_WIDTH - 160
+            bar_y = bar_start_y + i * 25
+            pygame.draw.rect(screen, (50, 50, 50), (bar_x, bar_y, 150, 20))
+            pygame.draw.rect(screen, bar_color, (bar_x, bar_y, int(150 * progress), 20))
+            label = "Jugador" if car is player_car else name
+            name_text = self.font_small.render(label, True, WHITE)
+            screen.blit(name_text, (bar_x, bar_y - 16))

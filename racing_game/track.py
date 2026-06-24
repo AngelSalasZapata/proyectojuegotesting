@@ -141,20 +141,14 @@ class Track:
         return self.is_on_track(px, py), px, py
 
     def constrain_car(self, car):
-        """Empuja al auto de vuelta a la pista cuando se sale,
-        proyectandolo sobre la linea central y escalando su posicion
-        para que quede dentro del ancho de la pista. La velocidad se
-        reduce solo un poco, evitando que el auto se queda clavado."""
         progress, dist, proj_x, proj_y, seg_idx = self._track_info(car.x, car.y)
-        margin = 5
-        max_allowed = self.hw - margin
-        if dist > max_allowed:
-            if dist > 0.001:
-                ratio = max_allowed / dist
-                car.x = proj_x + (car.x - proj_x) * ratio
-                car.y = proj_y + (car.y - proj_y) * ratio
+        if dist > self.hw - 5:
+            target = self.hw * 0.5
+            ratio = target / max(dist, 1)
+            car.x = proj_x + (car.x - proj_x) * ratio
+            car.y = proj_y + (car.y - proj_y) * ratio
             if abs(car.speed) > 0.3:
-                car.speed *= 0.95
+                car.speed *= 0.97
             return True
         return False
 

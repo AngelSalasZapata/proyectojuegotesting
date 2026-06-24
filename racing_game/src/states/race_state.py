@@ -1,12 +1,21 @@
+import math
+import random
 import pygame
+
 from settings import LAP_COUNT, AI_CAR_COUNT, AI_CAR_COLORS, TRACK_DATA_PATH
 from src.core.camera import Camera
-from track import Track
-from track_loader import load_track_config
+from src.core.track import Track
+from src.core.track_loader import load_track_config
 from src.entities.car import Car
 from src.entities.ai_car import AICar
 from src.ui.hud import HUD
 from src.utils.collisions import car_collision_mtv
+
+# Filas/columnas de la parrilla de salida, relativas a la linea de salida
+# (waypoint 0). Las filas estan "detras" de la linea (offset hacia atras)
+# para que ningun auto arranque ya cruzando la meta.
+GRID_ROWS = (10, 65, 120)
+GRID_COLS = (-60, 0, 60)
 
 
 class RaceState:
@@ -29,34 +38,72 @@ class RaceState:
         self.race_time = 0
         config = load_track_config(TRACK_DATA_PATH)
         self.track = Track.from_config(config)
-        self._create_player()
-        self._create_ai_cars()
+        self._create_cars()
 
-    def _create_player(self):
-        sp = self.track.waypoints[0]
-        self.player = Car(sp[0], sp[1], (255, 50, 50))
+    def _find_on_track_position(self, x, y, max_radius=80, step=4):
+        if self.track.is_on_track(x, y):
+            return x, y
+
+        # Busca el punto valido mas cercano alrededor de la posicion base.
+        for radius in range(step, max_radius + 1, step):
+            for dx in range(-radius, radius + 1, step):
+                for dy in (-radius, radius):
+                    px = x + dx
+                    py = y + dy
+                    if self.track.is_on_track(px, py):
+                        return px, py
+            for dy in range(-radius + step, radius - step + 1, step):
+                for dx in (-radius, radius):
+                    px = x + dx
+                    py = y + dy
+                    if self.track.is_on_track(px, py):
+                        return px, py
+        return x, y
+
+    def _create_cars(self):
+        """Arma la parrilla de salida con un orden y una posicion distinta
+        en cada carrera: se generan varias casillas en los limites de la
+        pista cerca de la linea de salida, se descartan las que caen fuera
+        de pista segun la mascara y luego se baraja el resultado antes de
+        repartirlo entre el jugador y las IA."""
+        base = self.track.waypoints[0]
+        _, _, track_dir = self.track.get_lookahead_point(0, 0.1)
+        rad = math.radians(track_dir)
+        perp_x, perp_y = -math.sin(rad), math.cos(rad)
+        fwd_x, fwd_y = math.cos(rad), math.sin(rad)
+
+        needed = AI_CAR_COUNT + 1
+        candidates = []
+        for fo in GRID_ROWS:
+            origin_x = base[0] - fwd_x * fo
+            origin_y = base[1] - fwd_y * fo
+            for po in GRID_COLS:
+                tx = origin_x + perp_x * po
+                ty = origin_y + perp_y * po
+                on_track_x, on_track_y = self._find_on_track_position(tx, ty)
+                candidates.append((on_track_x, on_track_y))
+
+        unique_candidates = []
+        seen = set()
+        for pt in candidates:
+            if (round(pt[0]), round(pt[1])) not in seen:
+                seen.add((round(pt[0]), round(pt[1])))
+                unique_candidates.append(pt)
+
+        pool = unique_candidates if len(unique_candidates) >= needed else candidates
+        random.shuffle(pool)
+        slots = pool[:needed]
+
+        self.player = Car(slots[0][0], slots[0][1], (255, 50, 50))
         self.player.last_progress = self.track.get_progress(self.player.x, self.player.y)
+        self.player.angle = track_dir
 
-    def _create_ai_cars(self):
         self.ai_cars = []
-        pts = self.track.waypoints
-        n = len(pts)
         for i in range(AI_CAR_COUNT):
+            sx, sy = slots[i + 1]
             color = AI_CAR_COLORS[i % len(AI_CAR_COLORS)]
-            wp_idx = (i + 1) * n // (AI_CAR_COUNT + 1) % n
-            wp = pts[wp_idx]
-            speed_mult = 1.0
-            sx, sy = wp
-            for ox, oy in [(0, 0), (15, 15), (-15, -15), (15, -15), (-15, 15),
-                           (30, 0), (-30, 0), (0, 30), (0, -30)]:
-                tx, ty = wp[0] + ox, wp[1] + oy
-                if self.track.is_on_track(tx, ty):
-                    sx, sy = tx, ty
-                    break
-            ai = AICar(sx, sy, color, self.track, speed_mult, wp_idx)
-            ai_progress = self.track.get_progress(ai.x, ai.y)
-            ai.last_progress = ai_progress
-            _, _, track_dir = self.track.get_lookahead_point(ai_progress, 0.1)
+            ai = AICar(sx, sy, color, self.track, 1.5, 0)
+            ai.last_progress = self.track.get_progress(ai.x, ai.y)
             ai.angle = track_dir
             self.ai_cars.append(ai)
 
@@ -129,10 +176,7 @@ class RaceState:
                     cars[i].y -= ny * push
                     cars[j].x += nx * push
                     cars[j].y += ny * push
-                    if abs(cars[i].speed) > 0.1:
-                        cars[i].speed *= 0.8
-                    if abs(cars[j].speed) > 0.1:
-                        cars[j].speed *= 0.8
+
 
     def _check_race_finish(self):
         if self.race_finished:

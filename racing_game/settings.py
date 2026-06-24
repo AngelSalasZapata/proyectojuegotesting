@@ -33,11 +33,11 @@ TRACK_NAME = "track1"
 TRACK_DATA_PATH = os.path.join(BASE_DIR, "tracks", f"{TRACK_NAME}.json")
 
 # Color que la mascara usa para representar la superficie de pista transitable
-# Cualquier pixel que no se parezca a este color se considera pared/cesped y bloquea al auto. 
+# Cualquier pixel que no se parezca a este color se considera pared/cesped y bloquea al auto.
 TRACK_MASK_DRIVABLE_COLOR = (255, 255, 255)
 TRACK_MASK_COLOR_TOLERANCE = 30
 
-# Waypoints de referencia, solo se usan si no existe tracks/track1.json 
+# Waypoints de referencia, solo se usan si no existe tracks/track1.json
 TRACK_WAYPOINTS = [
     (500, 143),
     (700, 203),
@@ -52,8 +52,8 @@ TRACK_WAYPOINTS = [
 CAR_WIDTH = 40
 CAR_HEIGHT = 20
 CAR_COLOR = RED
-CAR_MAX_SPEED = 3.5
-CAR_ACCELERATION = 0.12
+CAR_MAX_SPEED = 2.5
+CAR_ACCELERATION = 0.09
 CAR_BRAKE = 0.08
 CAR_FRICTION = 0.97
 CAR_TURN_SPEED = 3.5
@@ -61,13 +61,13 @@ CAR_START_POS = (400, 200)
 
 AI_CAR_COLORS = [BLUE, YELLOW, PURPLE, ORANGE, CYAN]
 AI_CAR_COUNT = 5
-AI_SPEED_VARIATION = 0.3
-AI_TURN_SPEED = 3.2
+AI_SPEED_VARIATION = 7.5
+AI_TURN_SPEED = 0.3
 AI_TARGET_DISTANCE = 200
 AI_SLOW_DOWN_ANGLE = 30
 
-# Sensores de pared para que la IA "vea" obstaculos 
-AI_SENSOR_LENGTH = 70
+# Sensores de pared para que la IA "vea" obstaculos
+AI_SENSOR_LENGTH = 90
 AI_SENSOR_ANGLES = (-35, 0, 35)
 AI_STEER_SMOOTHING = 0.25
 
