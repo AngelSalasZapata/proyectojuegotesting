@@ -19,6 +19,7 @@ class AICar(Car):
         super().__init__(x, y, color)
         self.track = track
         self.max_speed *= speed_multiplier
+        self._base_max_speed = self.max_speed
         self.turn_speed = 0.5
         self.finished = False
 

@@ -20,6 +20,12 @@ class GameOverState:
         self.results = results
         self.player_won = bool(results and results[0][0] == "Jugador")
 
+    def _format_time(self, seconds):
+        mins = int(seconds // 60)
+        secs = int(seconds % 60)
+        millis = int((seconds - int(seconds)) * 100)
+        return f"{mins:02}:{secs:02}.{millis:02}"
+
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN:
@@ -46,10 +52,16 @@ class GameOverState:
             header_rect = header.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3))
             screen.blit(header, header_rect)
 
-            for i, (name, lap, finished) in enumerate(self.results):
+            for i, entry in enumerate(self.results):
+                name = entry[0]
+                finished = entry[2] if len(entry) > 2 else False
+                race_time = entry[3] if len(entry) > 3 else 0
                 color = YELLOW if i == 0 else WHITE
-                status = "Completo" if finished else "Abandono"
-                label = f"{i+1}. {name} - {status}"
+                if finished:
+                    time_str = self._format_time(race_time)
+                    label = f"{i+1}. {name} - {time_str}"
+                else:
+                    label = f"{i+1}. {name} - Abandono"
                 text = self.font_medium.render(label, True, color)
                 text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 3 + 50 + i * 40))
                 screen.blit(text, text_rect)

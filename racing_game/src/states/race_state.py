@@ -2,12 +2,13 @@ import math
 import random
 import pygame
 
-from settings import LAP_COUNT, AI_CAR_COUNT, AI_CAR_COLORS, TRACK_DATA_PATH
+from settings import LAP_COUNT, AI_CAR_COUNT, AI_CAR_COLORS, TRACK_DATA_PATH, POWERUP_SPAWN_INTERVAL, POWERUP_MAX_ON_TRACK
 from src.core.camera import Camera
 from src.core.track import Track
 from src.core.track_loader import load_track_config
 from src.entities.car import Car
 from src.entities.ai_car import AICar
+from src.entities.powerup import PowerUp
 from src.ui.hud import HUD
 from src.utils.collisions import car_collision_mtv
 
@@ -36,6 +37,8 @@ class RaceState:
         self.race_finished = False
         self.finish_order = []
         self.race_time = 0
+        self.powerups = []
+        self._powerup_spawn_timer = 0
         config = load_track_config(TRACK_DATA_PATH)
         self.track = Track.from_config(config)
         self._create_cars()
@@ -59,6 +62,33 @@ class RaceState:
                     if self.track.is_on_track(px, py):
                         return px, py
         return x, y
+
+    def _spawn_powerup(self):
+        for _ in range(100):
+            seg = random.randint(0, self.track.n - 1)
+            t = random.random()
+            p1 = self.track.waypoints[seg]
+            p2 = self.track.waypoints[(seg + 1) % self.track.n]
+            px = p1[0] + (p2[0] - p1[0]) * t + random.uniform(-25, 25)
+            py = p1[1] + (p2[1] - p1[1]) * t + random.uniform(-25, 25)
+            if self.track.is_on_track(px, py):
+                too_close = any(math.hypot(px - pu.x, py - pu.y) < 50 for pu in self.powerups)
+                if not too_close:
+                    ptype = random.choice([PowerUp.BOOST, PowerUp.SLOW])
+                    self.powerups.append(PowerUp(px, py, ptype))
+                    return True
+        return False
+
+    def _check_powerup_collisions(self):
+        all_cars = [self.player] + self.ai_cars
+        for pu in self.powerups:
+            if not pu.active:
+                continue
+            for car in all_cars:
+                if math.hypot(car.x - pu.x, car.y - pu.y) < 30:
+                    car.apply_powerup(pu.type)
+                    pu.active = False
+                    break
 
     def _create_cars(self):
         """Arma la parrilla de salida con un orden y una posicion distinta
@@ -131,7 +161,7 @@ class RaceState:
                 if car.lap >= LAP_COUNT:
                     car.finished = True
                     label = "Jugador" if car is self.player else f"IA {self.ai_cars.index(car) + 1}"
-                    self.finish_order.append((label, car.lap, True))
+                    self.finish_order.append((label, car.lap, True, self.race_time))
         car.last_progress = progress
 
     def update(self, dt):
@@ -159,6 +189,14 @@ class RaceState:
                 self.track.constrain_car(ai)
                 self._update_race_progress(ai)
 
+        self._powerup_spawn_timer += dt
+        if self._powerup_spawn_timer >= POWERUP_SPAWN_INTERVAL:
+            self._powerup_spawn_timer = 0
+            active = sum(1 for p in self.powerups if p.active)
+            if active < POWERUP_MAX_ON_TRACK:
+                self._spawn_powerup()
+
+        self._check_powerup_collisions()
         self._resolve_car_collisions()
 
         self.camera.follow(self.player)
@@ -198,6 +236,9 @@ class RaceState:
         self.track.render(screen, self.camera)
         self.track.render_start_finish(screen, self.camera)
         self.track.draw_checkpoints(screen, self.camera)
+
+        for pu in self.powerups:
+            pu.draw(screen, self.camera)
 
         self.player.draw(screen, self.camera)
         for ai in self.ai_cars:

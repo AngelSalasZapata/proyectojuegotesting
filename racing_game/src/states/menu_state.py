@@ -1,5 +1,5 @@
 import pygame
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE, GREEN, FONT_SIZE_LARGE, FONT_SIZE_MEDIUM, FONT_NAME
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE, GREEN, FONT_SIZE_LARGE, FONT_SIZE_MEDIUM, FONT_NAME, POWERUP_BOOST_COLOR, POWERUP_SLOW_COLOR
 
 
 class MenuState:
@@ -7,6 +7,7 @@ class MenuState:
         self.state_manager = state_manager
         self.font_large = pygame.font.Font(FONT_NAME, FONT_SIZE_LARGE)
         self.font_medium = pygame.font.Font(FONT_NAME, FONT_SIZE_MEDIUM)
+        self.font_small = pygame.font.Font(FONT_NAME, 28)
 
     def enter(self):
         pass
@@ -43,3 +44,19 @@ class MenuState:
         controls_text = self.font_medium.render("Flechas - Conducir | ESC - Pausa", True, (200, 200, 200))
         controls_rect = controls_text.get_rect(center=(SCREEN_WIDTH // 2, int(SCREEN_HEIGHT * 0.72)))
         screen.blit(controls_text, controls_rect)
+
+        pu_title = self.font_medium.render("Bonificadores", True, WHITE)
+        pu_title_rect = pu_title.get_rect(center=(SCREEN_WIDTH // 2, int(SCREEN_HEIGHT * 0.82)))
+        screen.blit(pu_title, pu_title_rect)
+
+        boost_text = self.font_small.render(
+            "Cuadrado Verde - Aumenta la velocidad", True, POWERUP_BOOST_COLOR
+        )
+        boost_rect = boost_text.get_rect(center=(SCREEN_WIDTH // 2, int(SCREEN_HEIGHT * 0.88)))
+        screen.blit(boost_text, boost_rect)
+
+        slow_text = self.font_small.render(
+            "Cuadrado Rojo - Reduce la velocidad", True, POWERUP_SLOW_COLOR
+        )
+        slow_rect = slow_text.get_rect(center=(SCREEN_WIDTH // 2, int(SCREEN_HEIGHT * 0.93)))
+        screen.blit(slow_text, slow_rect)
