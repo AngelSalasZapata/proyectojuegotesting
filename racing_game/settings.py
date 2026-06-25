@@ -88,3 +88,17 @@ FONT_NAME = None
 FONT_SIZE_SMALL = 24
 FONT_SIZE_MEDIUM = 36
 FONT_SIZE_LARGE = 72
+
+
+# --- Menú ---
+MENU_OPTION_COLOR = (200, 200, 200)
+MENU_SELECTED_COLOR = (255, 255, 0)
+MENU_BG_COLOR = (20, 20, 20)
+
+# --- Animaciones ---
+COUNTDOWN_DURATION = 3.0  # segundos
+COUNTDOWN_FONT_SIZE = 120
+
+# --- Efectos visuales ---
+PARTICLE_COUNT = 20
+PARTICLE_LIFETIME = 1.0  # segundos

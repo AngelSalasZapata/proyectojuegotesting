@@ -148,6 +148,10 @@ class RaceState:
                     pause_state.capture_background(pygame.display.get_surface())
                     self.state_manager.change_state("pause")
 
+                elif event.key == pygame.K_r and not self.race_finished:
+                    # Reiniciar la carrera
+                    self.state_manager.change_state("race")
+
     def _update_race_progress(self, car):
         if car.finished:
             return

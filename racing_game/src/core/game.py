@@ -5,6 +5,7 @@ from src.states.menu_state import MenuState
 from src.states.race_state import RaceState
 from src.states.pause_state import PauseState
 from src.states.gameover_state import GameOverState
+from src.states.controls_state import ControlsState
 
 
 class Game:
@@ -17,6 +18,7 @@ class Game:
 
         self.state_manager = StateManager()
         self.state_manager.add_state("menu", MenuState(self.state_manager))
+        self.state_manager.add_state("controls", ControlsState(self.state_manager))
         self.state_manager.add_state("race", RaceState(self.state_manager))
         self.state_manager.add_state("pause", PauseState(self.state_manager))
         self.state_manager.add_state("gameover", GameOverState(self.state_manager))

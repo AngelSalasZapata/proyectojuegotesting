@@ -34,6 +34,8 @@ class GameOverState:
                     self.state_manager.change_state("race")
                 elif event.key == pygame.K_ESCAPE:
                     self.state_manager.change_state("menu")
+                elif event.key == pygame.K_r:
+                    self.state_manager.change_state("race")
 
     def update(self, dt):
         pass
@@ -96,7 +98,7 @@ class GameOverState:
                 screen.blit(text, text_rect)
 
         # bottom buttons
-        restart = self.font_medium.render("Presiona ENTER para otra carrera", True, GREEN)
+        restart = self.font_medium.render("Presiona ENTER o R para otra carrera", True, GREEN)
         restart_rect = restart.get_rect(center=(SCREEN_WIDTH // 2, int(SCREEN_HEIGHT * 0.80)))
         screen.blit(restart, restart_rect)
 

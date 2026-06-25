@@ -25,6 +25,8 @@ class PauseState:
                     self.state_manager.change_state("race", enter=False)
                 elif event.key == pygame.K_q:
                     self.state_manager.change_state("menu")
+                elif event.key == pygame.K_r:
+                    self.state_manager.change_state("race")
 
     def update(self, dt):
         pass
@@ -45,6 +47,10 @@ class PauseState:
         resume_rect = resume_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
         screen.blit(resume_text, resume_rect)
 
+        restart_text = self.font_medium.render("Presiona R para reiniciar carrera", True, (255, 255, 0))
+        restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 40))
+        screen.blit(restart_text, restart_rect)
+
         quit_text = self.font_medium.render("Presiona Q para salir", True, (200, 200, 200))
-        quit_rect = quit_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+        quit_rect = quit_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 80))
         screen.blit(quit_text, quit_rect)
