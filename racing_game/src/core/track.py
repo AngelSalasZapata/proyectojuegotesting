@@ -141,12 +141,6 @@ class Track:
         return self.is_on_track(px, py), px, py
 
     def constrain_car(self, car):
-        """Evita que el auto atraviese paredes/cesped/islas centrales.
-        Si alguna esquina o el centro del auto cae fuera de la zona
-        transitable, se revierte a la posicion anterior valida, se
-        empuja suavemente hacia el centro de la pista y se reduce
-        la velocidad lo justo para evitar que se clave o buge.
-        """
         points = car.get_corners() + [(car.x, car.y)]
         hit_wall = any(not self.is_on_track(px, py) for px, py in points)
 
